@@ -1,21 +1,44 @@
-# Waveshare2in13V1
-
-**TODO: Add description**
+This project provides a driver for the Waveshare 2.13 inch e-paper display (V1) for Elixir projects.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `waveshare_2in13_v1` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `waveshare_2in13_v1` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:waveshare_2in13_v1, "~> 0.1.0"}
+    {:inky, "~> 1.0"},
+    {:waveshare_2in13_v1, github: "qhwa/waveshare_2in13_v1"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/waveshare_2in13_v1>.
+## Usage
 
+```elixir
+display = %Inky.Display{
+  type: :waveshare_2in13,
+  width: 122,
+  height: 250,
+  rotation: 0,
+  accent: :black,
+  packed_dimensions: %{
+    width: <<16>>,
+    height: <<250, 0>>
+  },
+  luts: nil
+}
+
+{:ok, pid} =
+  Inky.start_link(:phat, :black, hal_mod: Waveshare2in13V1.Driver.HAL, display: display)
+
+
+Inky.set_pixels(pid, fn x, y, w, h, _acc ->
+  case {div(x * 2, w), div(y * 2, h)} do
+    {0, 0} -> :black
+    {1, 0} -> :white
+    {0, 1} -> :white
+    {1, 1} -> :black
+  end
+end, push: :await)
+```
